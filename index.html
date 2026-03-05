@@ -3,88 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keygap Dashboard V2.0</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>Keygap Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #00ff95; --bg: #050505; }
+        :root { 
+            --neon-green: #00ff95; 
+            --dark-green: #004d2e;
+            --text-main: #e0fdf0; /* Bianco Ciano per leggibilità */
+            --bg-dark: #080a0c; 
+            --bg-panel: rgba(13, 17, 23, 0.85); /* Effetto Vetro */
+            --border-glow: 0 0 10px rgba(0, 255, 149, 0.3);
+            --font-cyber: 'Orbitron', sans-serif;
+            --font-data: 'Roboto Mono', monospace;
+        }
+        
+        * { box-sizing: border-box; }
         body { 
-            margin: 0; background: var(--bg); color: var(--neon); font-family: 'Orbitron', sans-serif; 
+            margin: 0; background: var(--bg-dark); color: var(--text-main); font-family: var(--font-data); 
             display: flex; height: 100vh; overflow: hidden;
+            /* Sfondo a griglia più sottile e scuro */
+            background-image: linear-gradient(rgba(0, 255, 149, 0.02) 1px, transparent 1px), 
+                              linear-gradient(90deg, rgba(0, 255, 149, 0.02) 1px, transparent 1px); 
+            background-size: 50px 50px; 
         }
-        /* Effetto Scanner Laser */
-        body::after {
-            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: var(--neon); box-shadow: 0 0 15px var(--neon);
-            animation: scan 4s linear infinite; z-index: 100; pointer-events: none; opacity: 0.3;
-        }
-        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
 
+        /* Sidebar Professionale */
         .sidebar { 
-            width: 280px; border-right: 1px solid var(--neon); padding: 20px; 
-            display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.95);
+            width: 300px; background: #0b0e11; border-right: 1px solid rgba(0, 255, 149, 0.2);
+            display: flex; flex-direction: column; padding: 30px; z-index: 10;
+            box-shadow: 5px 0 20px rgba(0,0,0,0.5);
         }
-        .main { flex-grow: 1; padding: 40px; display: flex; flex-direction: column; gap: 30px; overflow-y: auto; }
-        
-        .header-stats { display: flex; justify-content: space-between; border: 1px solid var(--neon); padding: 15px; background: rgba(0,255,149,0.05); }
-        
-        .search-area { 
-            border: 1px solid var(--neon); padding: 30px; background: rgba(0,255,149,0.02);
-            box-shadow: inset 0 0 20px rgba(0,255,149,0.05);
+        .brand { 
+            font-family: var(--font-cyber); font-weight: 900; font-size: 1.5rem; 
+            color: var(--neon-green); text-align: center; margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(0, 255, 149, 0.5);
         }
-        .search-form { display: flex; gap: 10px; margin-top: 20px; }
-        input { flex-grow: 1; background: #000; border: 1px solid var(--neon); color: var(--neon); padding: 15px; font-family: inherit; outline: none; }
-        button { background: var(--neon); color: #000; border: none; padding: 15px 30px; font-weight: 900; cursor: pointer; }
+        .status-bar { 
+            font-size: 0.75rem; text-align: center; color: rgba(224, 253, 240, 0.5);
+            margin-bottom: 40px; border: 1px solid rgba(0,255,149,0.1); padding: 5px;
+        }
+        .nav-links { display: flex; flex-direction: column; gap: 15px; flex-grow: 1; }
+        .nav-item { 
+            text-decoration: none; color: var(--text-main); font-size: 0.9rem; 
+            padding: 15px; border: 1px solid transparent; transition: 0.3s;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .nav-item:hover { 
+            background: rgba(0, 255, 149, 0.03); border-color: rgba(0, 255, 149, 0.2);
+            color: var(--neon-green); box-shadow: var(--border-glow);
+        }
+        .nav-item::after { content: '►'; font-size: 0.7em; opacity: 0; transition: 0.3s; }
+        .nav-item:hover::after { opacity: 1; }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        .card { 
-            border: 1px solid var(--neon); padding: 20px; text-align: center; 
-            text-decoration: none; color: var(--neon); transition: 0.3s; background: rgba(0,0,0,0.5);
-        }
-        .card:hover { background: var(--neon); color: #000; box-shadow: 0 0 20px var(--neon); }
+        /* Area Principale */
+        .main { flex-grow: 1; display: flex; flex-direction: column; padding: 50px; overflow-y: auto; gap: 40px; }
         
-        .btn-side { 
-            text-decoration: none; color: var(--neon); border: 1px solid var(--neon); 
-            padding: 10px; font-size: 0.8rem; text-align: center; transition: 0.2s;
+        /* Pannelli Effetto Vetro */
+        .panel { 
+            background: var(--bg-panel); border: 1px solid rgba(0, 255, 149, 0.15);
+            padding: 30px; backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 15px rgba(0, 255, 149, 0.02);
+            position: relative;
         }
-        .btn-side:hover { background: rgba(0,255,149,0.2); }
+        .panel::before { /* Dettaglio Angolare */
+            content: ''; position: absolute; top: -1px; left: -1px; width: 10px; height: 10px;
+            border-top: 2px solid var(--neon-green); border-left: 2px solid var(--neon-green);
+        }
+
+        /* Ricerca Avanzata */
+        .search-title { font-family: var(--font-cyber); font-size: 1.8rem; margin: 0 0 20px 0; color: #fff; }
+        .search-form { display: flex; gap: 15px; }
+        input[type="text"] { 
+            flex-grow: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(0,255,149,0.2); 
+            color: #fff; padding: 18px; font-family: var(--font-data); font-size: 1.1rem; outline: none;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+        }
+        input[type="text"]:focus { border-color: var(--neon-green); box-shadow: var(--border-glow), inset 0 2px 5px rgba(0,0,0,0.3); }
+        button[type="submit"] { 
+            background: var(--neon-green); color: #000; border: none; padding: 15px 35px; 
+            font-family: var(--font-cyber); font-weight: 900; font-size: 1rem; cursor: pointer; transition: 0.3s;
+        }
+        button[type="submit"]:hover { background: #fff; box-shadow: 0 0 20px rgba(255,255,255,0.5); transform: translateY(-2px); }
+
+        /* Griglia Categorie */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        .card { 
+            background: rgba(13, 17, 23, 0.6); border: 1px solid rgba(0, 255, 149, 0.1);
+            padding: 25px; text-decoration: none; color: var(--text-main); transition: 0.3s;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .card:hover { 
+            border-color: var(--neon-green); background: rgba(0, 255, 149, 0.02);
+            transform: translateY(-5px); box-shadow: var(--border-glow);
+        }
+        .card h3 { font-family: var(--font-cyber); margin: 0 0 10px 0; color: var(--neon-green); font-size: 1.1rem; }
+        .card p { margin: 0; font-size: 0.85rem; opacity: 0.7; line-height: 1.4; }
+
+        /* Footer Info */
+        .footer-info { 
+            margin-top: auto; font-size: 0.7rem; color: rgba(224, 253, 240, 0.4);
+            border-top: 1px solid rgba(0,255,149,0.1); padding-top: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <h2 style="font-size: 1.2rem; border-bottom: 2px solid var(--neon); padding-bottom: 10px;">KEYGAP_NODE</h2>
-        <div style="font-size: 0.7rem; margin-bottom: 20px;">UPLINK STATUS: <span style="color: #fff;">ENCRYPTED</span></div>
+        <div class="brand">KEYGAP</div>
+        <div class="status-bar">UPLINK_SECURE // NODE_ACTIVE</div>
         
-        <a href="https://www.amazon.it/gp/bestsellers/?tag=keygap-21" target="_blank" class="btn-side">TOP VENDUTI</a>
-        <a href="https://www.amazon.it/gp/new-releases/?tag=keygap-21" target="_blank" class="btn-side">NUOVE USCITE</a>
-        <a href="https://www.amazon.it/gp/movers-and-shakers/?tag=keygap-21" target="_blank" class="btn-side">PIÙ DESIDERATI</a>
+        <nav class="nav-links">
+            <a href="https://www.amazon.it/gp/bestsellers/?tag=keygap-21" target="_blank" class="nav-item"><span>Top Venduti</span></a>
+            <a href="https://www.amazon.it/gp/new-releases/?tag=keygap-21" target="_blank" class="nav-item"><span>Nuove Uscite</span></a>
+            <a href="https://www.amazon.it/gp/movers-and-shakers/?tag=keygap-21" target="_blank" class="nav-item"><span>Più Desiderati</span></a>
+            <a href="https://www.amazon.it/gp/goldbox?tag=keygap-21" target="_blank" class="nav-item"><span>Offerte Lampo</span></a>
+            <a href="https://www.amazon.it/warehouse?tag=keygap-21" target="_blank" class="nav-item"><span>Warehouse</span></a>
+        </nav>
         
-        <div style="margin-top: auto; font-size: 0.6rem; opacity: 0.5;">
-            NODE_ID: 676-LGTM<br>
-            LOCAL_TIME: <span id="clock">00:00:00</span>
+        <div class="footer-info">
+            OPERATOR: Giampiero Deluca<br>
+            SYS_TIME: <span id="clock" style="color:var(--neon-green)">00:00:00</span><br>
+            REGION: ITALY_NODE_676
         </div>
     </div>
 
     <div class="main">
-        <div class="header-stats">
-            <div>CORE: ACTIVE</div>
-            <div>TRAFFIC: TUNNELED</div>
-            <div>ID: KEYGAP-21</div>
-        </div>
-
-        <div class="search-area">
-            <div style="font-size: 0.8rem; opacity: 0.7;">► INIZIALIZZA SCANSIONE MERCATO</div>
+        <div class="panel">
+            <h2 class="search-title">Global Network Scanner</h2>
             <form action="https://www.amazon.it/s" method="GET" class="search-form" target="_blank">
-                <input type="text" name="k" placeholder="CERCA PRODOTTO SUL NETWORK..." required>
+                <input type="text" name="k" placeholder="Inserisci nome prodotto o codice ASIN..." required autocomplete="off">
                 <input type="hidden" name="tag" value="keygap-21">
-                <button type="submit">SCANNERIZZA</button>
+                <button type="submit">ESEGUI</button>
             </form>
         </div>
 
         <div class="grid">
-            <a href="https://www.amazon.it/s?k=offerte+informatica&tag=keygap-21" target="_blank" class="card"><h3>TECH NODE</h3><p>Hardware & PC</p></a>
-            <a href="https://www.amazon.it/s?k=gaming&tag=keygap-21" target="_blank" class="card"><h3>GAMING</h3><p>Console & Gear</p></a>
-            <a href="https://www.amazon.it/s?k=domotica&tag=keygap-21" target="_blank" class="card"><h3>DOMOTICA</h3><p>Smart Home</p></a>
-            <a href="https://www.amazon.it/s?k=offerte+lampo&tag=keygap-21" target="_blank" class="card"><h3>FLASH</h3><p>Offerte Lampo</p></a>
+            <a href="https://www.amazon.it/s?k=offerte+informatica&tag=keygap-21" target="_blank" class="card">
+                <div><h3>TECH_NODE</h3><p>Processori, Schede Video, Periferiche PC Avanzate</p></div>
+            </a>
+            <a href="https://www.amazon.it/s?k=gaming&tag=keygap-21" target="_blank" class="card">
+                <div><h3>GAMING_SECTOR</h3><p>Console Next-Gen, Accessori, Titoli Tripla A</p></div>
+            </a>
+            <a href="https://www.amazon.it/s?k=domotica&tag=keygap-21" target="_blank" class="card">
+                <div><h3>SMART_HOME</h3><p>Dispositivi IoT, Illuminazione Intelligente, Sicurezza</p></div>
+            </a>
+            <a href="https://www.amazon.it/s?k=offerte+low+price&tag=keygap-21&low-price=&high-price=20" target="_blank" class="card">
+                <div><h3>BUDGET_FILTERS</h3><p>Selezione prodotti verificati sotto i 20 Euro</p></div>
+            </a>
         </div>
     </div>
 
@@ -95,8 +159,7 @@
                 now.getMinutes().toString().padStart(2, '0') + ':' + 
                 now.getSeconds().toString().padStart(2, '0');
         }
-        setInterval(updateClock, 1000);
-        updateClock();
+        setInterval(updateClock, 1000); updateClock();
     </script>
 </body>
 </html>
