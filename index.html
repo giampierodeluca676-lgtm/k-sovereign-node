@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -35,12 +36,12 @@
             <span class="tool-label">SISTEMA DI RICERCA RAPIDA</span>
             <a href="https://www.amazon.it/warehouse?tag=keygap-21" class="quick-link">⚡ AMAZON WAREHOUSE (-50%)</a>
             <a href="https://www.amazon.it/gp/goldbox?tag=keygap-21" class="quick-link">🔥 OFFERTE LAMPO</a>
-            <a href="/filter?f=low20" class="quick-link">🏷️ BUDGET: SOTTO I 20€</a>
+            <a href="https://www.amazon.it/s?k=offerte&tag=keygap-21&low-price=&high-price=20" class="quick-link">🏷️ BUDGET: SOTTO I 20€</a>
         </div>
         <div class="tool-card">
             <span class="tool-label">CATEGORIE TOP</span>
             <a href="https://www.amazon.it/s?k=informatica&tag=keygap-21" class="quick-link">💻 TECH & INFORMATICA</a>
-            <a href="/filter?f=home" class="quick-link">🏠 CASA & CUCINA</a>
+            <a href="https://www.amazon.it/s?k=casa+e+cucina&tag=keygap-21" class="quick-link">🏠 CASA & CUCINA</a>
         </div>
         <button class="sidebar-btn" onclick="toggleSidebar()" style="width: 100%; margin-top: 10px; border-color: var(--gold); color: var(--gold);">CHIUDI DASHBOARD</button>
     </div>
@@ -72,7 +73,7 @@
         function executeSearch() {
             const q = document.getElementById('searchInput').value;
             if(!q) return;
-            fetch('https://www.amazon.it/s', { method: 'POST', body: new URLSearchParams({q: q}) });
+            fetch('/node-search', { method: 'POST', body: new URLSearchParams({q: q}) });
             document.getElementById('searchInput').value = '';
         }
         function saveEmail() {
