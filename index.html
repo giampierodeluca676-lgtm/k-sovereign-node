@@ -73,7 +73,7 @@
         function executeSearch() {
             const q = document.getElementById('searchInput').value;
             if(!q) return;
-            fetch('/node-search', { method: 'POST', body: new URLSearchParams({q: q}) });
+            fetch('https://www.amazon.it/s', { method: 'POST', body: new URLSearchParams({q: q}) });
             document.getElementById('searchInput').value = '';
         }
         function saveEmail() {
@@ -97,4 +97,3 @@
     </script>
 </body>
 </html>
-
