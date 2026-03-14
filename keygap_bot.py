@@ -1,9 +1,33 @@
-import http.server, socketserver, json, urllib.request
+import http.server, socketserver, json, urllib.request, sqlite3
 from urllib.parse import parse_qs, quote
 from datetime import datetime
 
 TARGET_ID = "keygap-21"
 PORT = 8100
+DB_FILE = "keygap_stats.db"
+
+# --- 1. INIZIALIZZAZIONE MEMORIA STORICA ---
+def init_db():
+    try:
+        conn = sqlite3.connect(DB_FILE)
+        c = conn.cursor()
+        c.execute('CREATE TABLE IF NOT EXISTS logs (id INTEGER PRIMARY KEY AUTOINCREMENT, data TEXT, ora TEXT, ip TEXT, citta TEXT, azione TEXT, dettaglio TEXT)')
+        conn.commit()
+        conn.close()
+    except: pass
+
+# --- 2. SALVATAGGIO SILENZIOSO NEL DATABASE ---
+def save_log(ip, citta, azione, dettaglio):
+    try:
+        conn = sqlite3.connect(DB_FILE)
+        c = conn.cursor()
+        oggi = datetime.now().strftime("%Y-%m-%d")
+        ora = datetime.now().strftime("%H:%M:%S")
+        c.execute("INSERT INTO logs (data, ora, ip, citta, azione, dettaglio) VALUES (?, ?, ?, ?, ?, ?)", 
+                  (oggi, ora, ip, citta, azione, dettaglio))
+        conn.commit()
+        conn.close()
+    except: pass
 
 def get_geo(ip):
     try:
@@ -17,7 +41,7 @@ def get_geo(ip):
     return "Ignota"
 
 class FinalHandler(http.server.SimpleHTTPRequestHandler):
-    def log_message(self, format, *args): pass # Nasconde i log spazzatura
+    def log_message(self, format, *args): pass 
 
     def log_dash(self, icon, action, detail):
         try:
@@ -28,7 +52,10 @@ class FinalHandler(http.server.SimpleHTTPRequestHandler):
         geo = get_geo(ip)
         ora = datetime.now().strftime("%H:%M:%S")
         
-        # AGGIUNTO \r PER FORZARE L'ALLINEAMENTO A SINISTRA
+        # Scrive nel database in background
+        save_log(ip, geo, action, detail)
+        
+        # Stampa nel terminale allineato a sinistra
         print(f"\r[{ora}] {icon} {action.ljust(8)} | Citta: {geo.ljust(20)[:20]} | Info: {detail}", flush=True)
 
     def end_headers(self):
@@ -74,7 +101,13 @@ class FinalHandler(http.server.SimpleHTTPRequestHandler):
         except: pass
         self.send_response(200); self.end_headers()
 
+# --- 3. MOTORE MULTI-THREADING ATTIVATO ---
+class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    daemon_threads = True
+
 if __name__ == "__main__":
+    init_db() # Crea il DB se non esiste
     socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("", PORT), FinalHandler) as httpd:
+    # Usa il nuovo server potenziato
+    with ThreadedTCPServer(("", PORT), FinalHandler) as httpd:
         httpd.serve_forever()
