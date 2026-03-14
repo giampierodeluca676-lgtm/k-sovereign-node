@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Keygap K-Sovereign Node</title>
+    <title>K-Sovereign Node | Dashboard v14.6</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --neon: #00ff95; --bg: #1a1d23; --panel: #2d323c; --sub: #252932; }
@@ -25,7 +25,7 @@
 </head>
 <body>
 <div class="status-bar"><span class="pulse"></span>NODE STATUS: OPERATIONAL | <span id="time"></span></div>
-<div class="header"><div class="logo">KEYGAP K-SOVEREIGN</div></div>
+<div class="header"><div class="logo">K-SOVEREIGN</div></div>
 <div class="main">
     <div class="search-form">
         <input type="text" id="q" placeholder="Esegui scansione database...">
@@ -40,7 +40,10 @@
 </div>
 <script>
     document.getElementById('time').innerText = new Date().toLocaleTimeString();
-    const BOT_URL = "https://bd278e7e5a00d0da-83-225-28-216.serveousercontent.com"; 
+    
+    // --- NUOVO LINK SERVEO ---
+    const BOT_URL = "https://2afa7d83f5a2a339-83-225-28-216.serveousercontent.com"; 
+
     async function go(path, isPost) {
         const query = document.getElementById('q').value;
         const target = BOT_URL + path;
