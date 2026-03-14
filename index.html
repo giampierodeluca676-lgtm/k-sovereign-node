@@ -44,7 +44,7 @@
         .nav-btn { background: var(--sub); border: 1px solid rgba(0,255,149,0.3); color: var(--neon); padding: 10px; border-radius: 6px; text-decoration: none; font-size: 0.65rem; text-align: center; font-weight: bold; }
 
         @media (max-width: 480px) {
-            .grid { grid-template-columns: 1fr 1fr; } /* Mantiene due colonne su mobile */
+            .grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -95,50 +95,50 @@
 <script>
     document.getElementById('time').innerText = new Date().toLocaleTimeString();
     
-    // --- IMPORTANTE: Aggiorna questo link ogni volta che riavvii il tunnel ---
-    const BOT_URL = "https://dark-vans-chew.loca.lt"; 
+    // --- LINK AGGIORNATO DA TERMINALE ---
+    const BOT_URL = "https://nice-carrots-cut.loca.lt"; 
 
     async function go(path, isPost) {
         const query = document.getElementById('q').value;
         const target = BOT_URL + path;
         
+        // Header per bypassare la pagina di avviso di Localtunnel
+        const bypassHeaders = {
+            "Bypass-Tunnel-Reminder": "true"
+        };
+
         try {
             let res;
             if(isPost) {
-                // Gestione Ricerca (POST)
                 res = await fetch(target, { 
                     method: 'POST', 
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    headers: { 
+                        ...bypassHeaders, 
+                        'Content-Type': 'application/x-www-form-urlencoded' 
+                    },
                     body: new URLSearchParams({q: query}) 
                 });
             } else {
-                // Gestione Filtri (GET)
-                res = await fetch(target);
+                res = await fetch(target, { 
+                    headers: bypassHeaders 
+                });
             }
             const data = await res.json();
             if(data.url) window.location.href = data.url;
         } catch (e) {
-            // Fallback diretto se il bot è offline o il tunnel è scaduto
-            console.log("Bot offline, uso fallback Amazon...");
+            // Fallback su Amazon con tag keygap-21 se il bot non risponde
             let fallbackUrl = `https://www.amazon.it/s?k=${query || 'offerte'}&tag=keygap-21`;
-            if(!isPost && path.includes('f=')) {
-                const filter = path.split('=')[1];
-                if(filter === 'low20') fallbackUrl = "https://www.amazon.it/s?k=offerte&tag=keygap-21&low-price=&high-price=20";
-            }
             window.location.href = fallbackUrl;
         }
     }
 
-    // Intercetta tutti i clic sui tasti della dashboard
     document.querySelectorAll('.link, .nav-btn').forEach(l => {
         l.onclick = (e) => { 
             e.preventDefault(); 
-            const path = l.getAttribute('href');
-            go(path, false); 
+            go(l.getAttribute('href'), false); 
         };
     });
 
-    // Ricerca premendo INVIO
     document.getElementById('q').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') { go('/node-search', true); }
     });
