@@ -3,26 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Keygap K-Sovereign | Market Intelligence</title>
+    <title>K-Sovereign Node | Dashboard v14.6</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --neon: #00ff95; --bg: #1a1d23; --panel: #2d323c; --sub: #252932; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
         
+        /* STATUS BAR */
         .status-bar { background: rgba(0, 255, 149, 0.1); border-bottom: 1px solid var(--neon); padding: 12px; text-align: center; font-family: 'Orbitron'; font-size: 0.7rem; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(5px); }
         .pulse { display: inline-block; width: 8px; height: 8px; background: var(--neon); border-radius: 50%; margin-right: 8px; box-shadow: 0 0 10px var(--neon); animation: p 1.5s infinite; }
-        @keyframes p { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes p { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
 
+        /* HEADER */
         .header { background: var(--sub); padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .logo { font-family: 'Orbitron'; color: var(--neon); font-size: 1.4rem; letter-spacing: 2px; }
 
         .main { padding: 15px; max-width: 800px; margin: 0 auto; }
 
+        /* SEARCH */
         .search-form { display: flex; gap: 10px; margin-bottom: 20px; }
         input { flex: 1; background: var(--sub); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; color: #fff; outline: none; font-size: 16px; }
         .btn-scan { background: var(--neon); border: none; padding: 15px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; color: #000; font-family: 'Orbitron'; font-size: 0.8rem; }
 
+        /* GRID */
         .section-title { font-family: 'Orbitron'; font-size: 0.8rem; color: var(--neon); margin: 25px 0 15px 5px; text-transform: uppercase; border-left: 3px solid var(--neon); padding-left: 10px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .panel { background: var(--panel); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
@@ -39,7 +43,7 @@
 
 <div class="main">
     <div class="search-form">
-        <input type="text" id="q" placeholder="Cerca nel database tech...">
+        <input type="text" id="q" placeholder="Esegui scansione database...">
         <button class="btn-scan" onclick="go('/node-search', true)">SCAN</button>
     </div>
 
@@ -55,8 +59,8 @@
 <script>
     document.getElementById('time').innerText = new Date().toLocaleTimeString();
     
-    // --- LINK SERVEO AGGIORNATO ---
-    const BOT_URL = "https://14877b3318dd5112-83-225-28-216.serveousercontent.com"; 
+    // --- IL TUO NUOVO LINK SERVEO ---
+    const BOT_URL = "https://2d6e613a746bc0c9-83-225-28-216.serveousercontent.com"; 
 
     async function go(path, isPost) {
         const query = document.getElementById('q').value;
@@ -64,19 +68,21 @@
         
         try {
             let res;
+            const headers = { "Bypass-Tunnel-Reminder": "true" };
+            
             if(isPost) {
                 res = await fetch(target, { 
                     method: 'POST', 
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    headers: { ...headers, 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams({q: query}) 
                 });
             } else {
-                res = await fetch(target);
+                res = await fetch(target, { headers });
             }
             const data = await res.json();
             if(data.url) window.location.href = data.url;
         } catch (e) {
-            // Fallback diretto su Amazon
+            // Se il bot non risponde (502 o offline), usa il tag affiliato direttamente
             window.location.href = `https://www.amazon.it/s?k=${query || 'offerte'}&tag=keygap-21`;
         }
     }
