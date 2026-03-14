@@ -27,8 +27,9 @@ class FinalHandler(http.server.SimpleHTTPRequestHandler):
         
         geo = get_geo(ip)
         ora = datetime.now().strftime("%H:%M:%S")
-        # Formato ultra compatto per schermi stretti
-        print(f"[{ora}] {icon} {action} | Citta: {geo} | Info: {detail}", flush=True)
+        
+        # AGGIUNTO \r PER FORZARE L'ALLINEAMENTO A SINISTRA
+        print(f"\r[{ora}] {icon} {action.ljust(8)} | Citta: {geo.ljust(20)[:20]} | Info: {detail}", flush=True)
 
     def end_headers(self):
         self.send_header('Access-Control-Allow-Origin', '*')

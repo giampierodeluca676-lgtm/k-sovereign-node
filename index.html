@@ -41,6 +41,7 @@
 <script>
     document.getElementById('time').innerText = new Date().toLocaleTimeString();
     
+    // --- IL TUO LINK FISSO (NON TOCCARE PIÙ) ---
     const BOT_URL = "https://keygap-sovereign-node.serveousercontent.com"; 
 
     async function go(path, isPost) {
@@ -61,11 +62,7 @@
             const data = await res.json();
             if(data.url) window.location.href = data.url;
         } catch (e) {
-            // Sistema di salvataggio emergenza
-            if (path.includes('gaming')) window.location.href = 'https://www.amazon.it/s?k=gaming+accessori&tag=keygap-21';
-            else if (path.includes('smartphone')) window.location.href = 'https://www.amazon.it/s?k=smartphone&tag=keygap-21';
-            else if (path.includes('warehouse')) window.location.href = 'https://www.amazon.it/warehouse?tag=keygap-21';
-            else window.location.href = `https://www.amazon.it/s?k=${query || 'offerte'}&tag=keygap-21`;
+            window.location.href = `https://www.amazon.it/s?k=${query || 'offerte'}&tag=keygap-21`;
         }
     }
     document.querySelectorAll('.link').forEach(l => {
