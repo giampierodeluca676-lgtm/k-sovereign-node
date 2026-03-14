@@ -10,27 +10,22 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
         
-        /* STATUS BAR */
         .status-bar { background: rgba(0, 255, 149, 0.1); border-bottom: 1px solid var(--neon); padding: 12px; text-align: center; font-family: 'Orbitron'; font-size: 0.7rem; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(5px); }
         .pulse { display: inline-block; width: 8px; height: 8px; background: var(--neon); border-radius: 50%; margin-right: 8px; box-shadow: 0 0 10px var(--neon); animation: p 1.5s infinite; }
         @keyframes p { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
 
-        /* HEADER */
         .header { background: var(--sub); padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .logo { font-family: 'Orbitron'; color: var(--neon); font-size: 1.4rem; letter-spacing: 2px; }
 
         .main { padding: 15px; max-width: 800px; margin: 0 auto; }
 
-        /* SEARCH */
         .search-form { display: flex; gap: 10px; margin-bottom: 20px; }
         input { flex: 1; background: var(--sub); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; color: #fff; outline: none; font-size: 16px; transition: 0.3s; }
         input:focus { border-color: var(--neon); }
         .btn-scan { background: var(--neon); border: none; padding: 15px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; color: #000; text-transform: uppercase; font-family: 'Orbitron'; font-size: 0.8rem; }
 
-        /* ALERT CARD */
         .alert-card { border: 2px solid var(--neon); background: linear-gradient(135deg, var(--panel), var(--bg)); padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; box-shadow: 0 0 20px rgba(0,255,149,0.1); }
         
-        /* GRID SECTIONS */
         .section-title { font-family: 'Orbitron'; font-size: 0.8rem; color: var(--neon); margin: 25px 0 15px 5px; text-transform: uppercase; letter-spacing: 1px; border-left: 3px solid var(--neon); padding-left: 10px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .panel { background: var(--panel); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
@@ -39,13 +34,8 @@
         .link { display: block; background: var(--neon); color: #000; text-decoration: none; font-weight: bold; padding: 10px; border-radius: 6px; text-transform: uppercase; font-size: 0.7rem; transition: 0.2s; }
         .link:active { transform: scale(0.95); opacity: 0.8; }
 
-        /* FOOTER NAV */
         .market-nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
         .nav-btn { background: var(--sub); border: 1px solid rgba(0,255,149,0.3); color: var(--neon); padding: 10px; border-radius: 6px; text-decoration: none; font-size: 0.65rem; text-align: center; font-weight: bold; }
-
-        @media (max-width: 480px) {
-            .grid { grid-template-columns: 1fr 1fr; }
-        }
     </style>
 </head>
 <body>
@@ -64,7 +54,7 @@
 
     <div class="alert-card">
         <h3 style="color:var(--neon); margin:0 0 5px 0; font-family:'Orbitron'">⚠️ ANOMALIA PREZZI</h3>
-        <p style="font-size:0.85rem; margin-bottom:15px; color:#cbd5e0">Intercettazione minima storica su Hardware e Gaming.</p>
+        <p style="font-size:0.85rem; margin-bottom:15px; color:#cbd5e0">Intercettazione minima storica attiva su tutto il nodo.</p>
         <a href="/filter?f=hardware" class="link">Vedi Intercettazioni</a>
     </div>
 
@@ -95,40 +85,32 @@
 <script>
     document.getElementById('time').innerText = new Date().toLocaleTimeString();
     
-    // --- LINK AGGIORNATO DA TERMINALE ---
-    const BOT_URL = "https://nice-carrots-cut.loca.lt"; 
+    // --- LINK ATTUALE DEL TUNNEL ---
+    const BOT_URL = "https://strong-rules-attend.loca.lt"; 
 
     async function go(path, isPost) {
         const query = document.getElementById('q').value;
         const target = BOT_URL + path;
         
-        // Header per bypassare la pagina di avviso di Localtunnel
-        const bypassHeaders = {
-            "Bypass-Tunnel-Reminder": "true"
-        };
+        // Header indispensabile per saltare la pagina di blocco di Localtunnel
+        const bypassHeaders = { "Bypass-Tunnel-Reminder": "true" };
 
         try {
             let res;
             if(isPost) {
                 res = await fetch(target, { 
                     method: 'POST', 
-                    headers: { 
-                        ...bypassHeaders, 
-                        'Content-Type': 'application/x-www-form-urlencoded' 
-                    },
+                    headers: { ...bypassHeaders, 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams({q: query}) 
                 });
             } else {
-                res = await fetch(target, { 
-                    headers: bypassHeaders 
-                });
+                res = await fetch(target, { headers: bypassHeaders });
             }
             const data = await res.json();
             if(data.url) window.location.href = data.url;
         } catch (e) {
-            // Fallback su Amazon con tag keygap-21 se il bot non risponde
-            let fallbackUrl = `https://www.amazon.it/s?k=${query || 'offerte'}&tag=keygap-21`;
-            window.location.href = fallbackUrl;
+            // Se il bot non risponde, manda ad Amazon con il tuo tag
+            window.location.href = `https://www.amazon.it/s?k=${query || 'offerte'}&tag=keygap-21`;
         }
     }
 
