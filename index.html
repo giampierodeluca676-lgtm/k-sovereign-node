@@ -41,7 +41,7 @@
 <script>
     document.getElementById('time').innerText = new Date().toLocaleTimeString();
     
-    // --- LINK FISSO REGISTRATO ---
+    // --- LINK STATICO ---
     const BOT_URL = "https://keygap-sovereign-node.serveousercontent.com"; 
 
     async function go(path, isPost) {
@@ -62,7 +62,6 @@
             const data = await res.json();
             if(data.url) window.location.href = data.url;
         } catch (e) {
-            // Fallback con tag affiliate incluso
             window.location.href = `https://www.amazon.it/s?k=${query || 'offerte'}&tag=keygap-21`;
         }
     }
