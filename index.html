@@ -25,6 +25,13 @@
         .panel { background: var(--panel); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
         .link { display: block; background: var(--neon); color: #000; text-decoration: none; font-weight: bold; padding: 10px; border-radius: 6px; text-transform: uppercase; font-size: 0.7rem; }
         
+        /* NUOVI STILI PER IL NODO TELEGRAM */
+        .telegram-node { background: var(--panel); border: 1px solid var(--neon); border-radius: 10px; padding: 20px; text-align: center; margin-top: 25px; box-shadow: 0 0 15px rgba(0, 255, 149, 0.05); }
+        .tg-title { font-family: 'Orbitron'; color: var(--neon); font-size: 1rem; margin-top: 0; letter-spacing: 1px; }
+        .tg-desc { font-size: 0.85rem; color: #aaa; margin-bottom: 20px; line-height: 1.5; }
+        .btn-tg { display: inline-block; background: transparent; color: var(--neon); border: 1px solid var(--neon); padding: 12px 20px; border-radius: 6px; text-decoration: none; font-family: 'Orbitron'; font-size: 0.8rem; transition: all 0.3s ease; text-transform: uppercase; }
+        .btn-tg:hover { background: var(--neon); color: #000; box-shadow: 0 0 15px var(--neon); }
+
         .footer { margin-top: 40px; padding: 30px 15px; text-align: center; font-size: 0.65rem; color: rgba(255,255,255,0.4); border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); }
         .footer b { color: var(--neon); }
     </style>
@@ -43,6 +50,15 @@
         <div class="panel"><h4>WAREHOUSE</h4><a href="/filter?f=warehouse" class="link">Accedi</a></div>
         <div class="panel"><h4>SOTTO I 20€</h4><a href="/filter?f=low20" class="link">Accedi</a></div>
     </div>
+
+    <div class="telegram-node">
+        <h3 class="tg-title">COMMUNICATION LINK: TELEGRAM</h3>
+        <p class="tg-desc">Connettiti al nodo centrale della community. Ricevi alert operativi, scopri nuovi tool in anteprima e interagisci con il network.</p>
+        <a href="INSERISCI_QUI_IL_TUO_LINK_TELEGRAM" target="_blank" class="btn-tg">
+            [ INIZIALIZZA CONNESSIONE ]
+        </a>
+    </div>
+
 </div>
 
 <footer class="footer">
