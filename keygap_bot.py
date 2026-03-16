@@ -13,9 +13,20 @@ def init_db():
     try:
         conn = sqlite3.connect(DB_FILE)
         c = conn.cursor()
-        # Manteniamo la struttura originale per non corrompere il DB esistente, 
-        # ma salveremo i nuovi dettagli avanzati dentro le vecchie colonne
         c.execute('CREATE TABLE IF NOT EXISTS logs (id INTEGER PRIMARY KEY AUTOINCREMENT, data TEXT, ora TEXT, ip TEXT, citta TEXT, azione TEXT, dettaglio TEXT, piattaforma TEXT)')
+        # NUOVA TABELLA PER IL SALVADANAIO
+        c.execute('CREATE TABLE IF NOT EXISTS charity (id INTEGER PRIMARY KEY, totale REAL)')
+        c.execute('INSERT OR IGNORE INTO charity (id, totale) VALUES (1, 0.0)')
+        conn.commit()
+        conn.close()
+    except: pass
+
+def update_charity(amount=0.05):
+    """Incrementa il salvadanaio a ogni interazione reale."""
+    try:
+        conn = sqlite3.connect(DB_FILE)
+        c = conn.cursor()
+        c.execute('UPDATE charity SET totale = totale + ? WHERE id = 1', (amount,))
         conn.commit()
         conn.close()
     except: pass
@@ -26,10 +37,7 @@ def save_log(ip, citta, tasto, categoria, oggetto, piattaforma):
         c = conn.cursor()
         oggi = datetime.now().strftime("%Y-%m-%d")
         ora = datetime.now().strftime("%H:%M:%S")
-        
-        # Uniamo Categoria e Oggetto per salvarli nel DB senza romperlo
         dettaglio_unito = f"{categoria} -> {oggetto}"
-        
         c.execute("INSERT INTO logs (data, ora, ip, citta, azione, dettaglio, piattaforma) VALUES (?, ?, ?, ?, ?, ?, ?)", 
                   (oggi, ora, ip, citta, tasto, dettaglio_unito, piattaforma))
         conn.commit()
@@ -47,7 +55,6 @@ def get_geo(ip):
     except: pass
     return "Ignota"
 
-# --- MATRICE TERMINALE ESPANSA ---
 def stampa_intestazione_tabella():
     print("\n\033[1;37m" + "━"*132 + "\033[0m")
     print(f"\033[1;37m┃ {'ORARIO'.ljust(10)} ┃ {'TASTO PREMUTO'.ljust(22)} ┃ {'CATEGORIA'.ljust(20)} ┃ {'OGGETTO SPECIFICO'.ljust(22)} ┃ {'STORE'.ljust(8)} ┃ {'ORIGINE (IP E ZONA)'.ljust(33)} ┃\033[0m")
@@ -59,27 +66,17 @@ class FinalHandler(http.server.SimpleHTTPRequestHandler):
     def log_dash_avanzato(self, tasto, categoria, oggetto, store):
         try:
             ip = self.headers.get('X-Forwarded-For', self.client_address[0]).split(',')[0].strip()
-        except:
-            ip = "Sconosciuto"
-        
+        except: ip = "Sconosciuto"
         geo = get_geo(ip)
         ora = datetime.now().strftime("%H:%M:%S")
-        
         save_log(ip, geo, tasto, categoria, oggetto, store)
-        
-        # Formattazione per la griglia
         f_ora = f"[{ora}]".ljust(10)
         f_tasto = tasto[:22].ljust(22)
         f_cat = categoria[:20].ljust(20)
         f_ogg = oggetto[:22].ljust(22)
         f_origine = f"{ip} ({geo})"[:33].ljust(33)
-        
         store_plain = store.upper()
-        if store == 'amazon':
-            f_store = f"\033[1;33m{store_plain.ljust(8)}\033[0m" # Giallo/Arancio
-        else:
-            f_store = f"\033[1;36m{store_plain.ljust(8)}\033[0m" # Ciano/Blu
-            
+        f_store = f"\033[1;33m{store_plain.ljust(8)}\033[0m" if store == 'amazon' else f"\033[1;36m{store_plain.ljust(8)}\033[0m"
         print(f"┃ \033[1;32m{f_ora}\033[0m ┃ \033[1;34m{f_tasto}\033[0m ┃ \033[1;37m{f_cat}\033[0m ┃ \033[1;35m{f_ogg}\033[0m ┃ {f_store} ┃ \033[1;31m{f_origine}\033[0m ┃", flush=True)
 
     def end_headers(self):
@@ -93,21 +90,33 @@ class FinalHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         parsed_path = urlparse(self.path)
+        # NUOVO ENDPOINT PER LE STATISTICHE DEL SALVADANAIO
+        if parsed_path.path == '/charity-stats':
+            try:
+                conn = sqlite3.connect(DB_FILE)
+                c = conn.cursor()
+                c.execute('SELECT totale FROM charity WHERE id = 1')
+                totale = c.fetchone()[0]
+                conn.close()
+                self.send_response(200); self.send_header('Content-type', 'application/json'); self.end_headers()
+                self.wfile.write(json.dumps({"totale": round(totale, 2)}).encode())
+            except: pass
+            return
+
         if '/filter' in parsed_path.path:
             try:
                 query_params = parse_qs(parsed_path.query)
                 filtro = query_params.get('f', [''])[0]
                 store = query_params.get('store', ['amazon'])[0]
-                
-                # Traduttore Operazioni: Mappa il click esatto
                 mappa_filtri = {
                     'warehouse': ('[PANNELLO] Warehouse', 'Usato Garantito', 'Intero Catalogo'),
                     'low20': ('[PANNELLO] Sotto i 20€', 'Basso Budget', 'Prodotti Economici'),
                     'gaming': ('[PANNELLO] Gaming', 'Setup & Accessori', 'Hardware Gaming'),
                     'smartphone': ('[PANNELLO] Smartphone', 'Telefonia Mobile', 'Dispositivi & Cover')
                 }
-                
                 tasto_premuto, categoria, oggetto_specifico = mappa_filtri.get(filtro, ('[LINK SCONOSCIUTO]', 'Varie', filtro))
+                
+                update_charity() # Incrementa salvadanaio
                 
                 if store == 'ebay':
                     base_ebay = f"&mkcid=1&mkrid=724-53478-19255-0&siteid=35&campid={CAMPAIGN_EBAY}&customid=keygap_filter&toolid=10001&mkevt=1"
@@ -130,8 +139,7 @@ class FinalHandler(http.server.SimpleHTTPRequestHandler):
                 self.log_dash_avanzato(tasto_premuto, categoria, oggetto_specifico, store)
                 self.send_response(200); self.send_header('Content-type', 'application/json'); self.end_headers()
                 self.wfile.write(json.dumps({"url": target_url}).encode())
-            except Exception as e:
-                self.send_response(500); self.end_headers()
+            except: pass
         else:
             self.send_response(200); self.send_header('Content-type', 'text/plain'); self.end_headers()
             self.wfile.write(b"OK")
@@ -142,23 +150,18 @@ class FinalHandler(http.server.SimpleHTTPRequestHandler):
             if cl > 0 and '/node-search' in self.path:
                 post_data = self.rfile.read(cl).decode('utf-8')
                 parsed_data = parse_qs(post_data)
-                
                 q = parsed_data.get('q', [''])[0]
                 store = parsed_data.get('store', ['amazon'])[0]
-                
                 if q:
-                    # Riconosce che è stata usata la barra di testo
+                    update_charity() # Incrementa salvadanaio
                     tasto_premuto = f"[BTN SCAN] {store.upper()}"
                     categoria = "Ricerca Libera Testo"
                     oggetto_specifico = f'"{q}"'
-                    
                     self.log_dash_avanzato(tasto_premuto, categoria, oggetto_specifico, store)
-                    
                     if store == 'ebay':
                         url = f"https://www.ebay.it/sch/i.html?_nkw={quote(q)}&mkcid=1&mkrid=724-53478-19255-0&siteid=35&campid={CAMPAIGN_EBAY}&customid=keygap_search&toolid=10001&mkevt=1"
                     else:
                         url = f"https://www.amazon.it/s?k={quote(q)}&tag={TARGET_AMAZON}&pct-off=20-99"
-                        
                     self.send_response(200); self.send_header('Content-type', 'application/json'); self.end_headers()
                     self.wfile.write(json.dumps({"url": url}).encode())
                     return

@@ -2,11 +2,16 @@
 [1;37m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
 [1;37m┃ ORARIO     ┃ TASTO PREMUTO          ┃ CATEGORIA            ┃ OGGETTO SPECIFICO      ┃ STORE    ┃ ORIGINE (IP E ZONA)               ┃[0m
 [1;37m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
-┃ [1;32m[09:41:33][0m ┃ [1;34m[PANNELLO] Gaming     [0m ┃ [1;37mSetup & Accessori   [0m ┃ [1;35mHardware Gaming       [0m ┃ [1;33mAMAZON  [0m ┃ [1;31m83.225.28.216 (Marina di Gioiosa [0m ┃
-┃ [1;32m[09:42:01][0m ┃ [1;34m[BTN SCAN] EBAY       [0m ┃ [1;37mRicerca Libera Testo[0m ┃ [1;35m"Tv"                  [0m ┃ [1;36mEBAY    [0m ┃ [1;31m83.225.28.216 (Marina di Gioiosa [0m ┃
+┃ [1;32m[09:50:15][0m ┃ [1;34m[PANNELLO] Gaming     [0m ┃ [1;37mSetup & Accessori   [0m ┃ [1;35mHardware Gaming       [0m ┃ [1;33mAMAZON  [0m ┃ [1;31m83.225.28.216 (Marina di Gioiosa [0m ┃
+┃ [1;32m[09:50:23][0m ┃ [1;34m[PANNELLO] Sotto i 20€[0m ┃ [1;37mBasso Budget        [0m ┃ [1;35mProdotti Economici    [0m ┃ [1;33mAMAZON  [0m ┃ [1;31m83.225.28.216 (Marina di Gioiosa [0m ┃
+┃ [1;32m[09:50:33][0m ┃ [1;34m[BTN SCAN] EBAY       [0m ┃ [1;37mRicerca Libera Testo[0m ┃ [1;35m"Pc"                  [0m ┃ [1;36mEBAY    [0m ┃ [1;31m83.225.28.216 (Marina di Gioiosa [0m ┃
+┃ [1;32m[09:51:22][0m ┃ [1;34m[PANNELLO] Gaming     [0m ┃ [1;37mSetup & Accessori   [0m ┃ [1;35mHardware Gaming       [0m ┃ [1;36mEBAY    [0m ┃ [1;31m83.225.28.216 (Marina di Gioiosa [0m ┃
+┃ [1;32m[09:51:32][0m ┃ [1;34m[PANNELLO] Gaming     [0m ┃ [1;37mSetup & Accessori   [0m ┃ [1;35mHardware Gaming       [0m ┃ [1;33mAMAZON  [0m ┃ [1;31m83.225.28.216 (Marina di Gioiosa [0m ┃
+┃ [1;32m[09:51:41][0m ┃ [1;34m[PANNELLO] Sotto i 20€[0m ┃ [1;37mBasso Budget        [0m ┃ [1;35mProdotti Economici    [0m ┃ [1;36mEBAY    [0m ┃ [1;31m83.225.28.216 (Marina di Gioiosa [0m ┃
 Traceback (most recent call last):
   File "/home/linuxlite/Desktop/Keygap_Project/keygap_bot.py", line 176, in <module>
-    httpd.serve_forever()
+    stampa_intestazione_tabella() 
+        ^^^^^^^^^^^^^^^^^^^^^
   File "/usr/lib/python3.12/socketserver.py", line 235, in serve_forever
     ready = selector.select(poll_interval)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

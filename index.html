@@ -29,12 +29,16 @@
         .panel { background: var(--panel); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: space-between;}
         .panel h4 { margin-top: 0; margin-bottom: 15px; font-size: 0.9rem; }
         
-        /* Nuovi bottoni sdoppiati per i pannelli rapidi */
         .panel-actions { display: flex; gap: 5px; width: 100%; }
         .btn-mini-amz { flex: 1; background: #ff9900; color: #000; border: none; padding: 10px 5px; border-radius: 6px; font-weight: bold; cursor: pointer; font-family: 'Orbitron'; font-size: 0.65rem; transition: opacity 0.3s; }
         .btn-mini-ebay { flex: 1; background: #0064d2; color: #fff; border: none; padding: 10px 5px; border-radius: 6px; font-weight: bold; cursor: pointer; font-family: 'Orbitron'; font-size: 0.65rem; transition: opacity 0.3s; }
-        .btn-mini-amz:hover, .btn-mini-ebay:hover { opacity: 0.8; }
         
+        /* STILE SALVADANAIO BENEFICO */
+        .charity-node { background: rgba(0, 255, 149, 0.03); border: 1px dashed var(--neon); border-radius: 10px; padding: 20px; text-align: center; margin-top: 25px; }
+        .fund-display { font-family: 'Orbitron'; font-size: 1.8rem; color: var(--neon); text-shadow: 0 0 10px var(--neon); margin: 10px 0; }
+        .progress-bar-container { background: rgba(255,255,255,0.05); height: 8px; border-radius: 4px; overflow: hidden; margin: 15px 0 5px; }
+        .progress-bar { background: var(--neon); width: 0%; height: 100%; transition: width 1s ease-in-out; box-shadow: 0 0 10px var(--neon); }
+
         .telegram-node { background: var(--panel); border: 1px solid var(--neon); border-radius: 10px; padding: 20px; text-align: center; margin-top: 25px; box-shadow: 0 0 15px rgba(0, 255, 149, 0.05); }
         .tg-title { font-family: 'Orbitron'; color: var(--neon); font-size: 1rem; margin-top: 0; letter-spacing: 1px; }
         .tg-desc { font-size: 0.85rem; color: #aaa; margin-bottom: 20px; line-height: 1.5; }
@@ -86,6 +90,16 @@
         </div>
     </div>
 
+    <div class="charity-node">
+        <h3 class="tg-title">COMMUNITY CHARITY FUND</h3>
+        <div class="fund-display" id="charity-total">€ 0.00</div>
+        <p class="tg-desc">Una parte delle commissioni viene accumulata qui. Al traguardo, la community deciderà l'evoluzione del fondo.</p>
+        <div class="progress-bar-container">
+            <div id="fund-progress" class="progress-bar"></div>
+        </div>
+        <p style="font-size: 0.6rem; color: var(--neon); margin-top: 10px; opacity: 0.6;">[ TARGET SOGLIA: € 500.00 ]</p>
+    </div>
+
     <div class="telegram-node">
         <h3 class="tg-title">COMMUNICATION LINK: TELEGRAM</h3>
         <p class="tg-desc">Connettiti al nodo centrale della community. Ricevi alert operativi, scopri nuovi tool in anteprima e interagisci con il network.</p>
@@ -102,28 +116,34 @@
 </footer>
 
 <script>
-    // --- AGGIORNAMENTO OROLOGIO FLUIDO ---
-    function updateClock() {
+    // --- OROLOGIO E STATS BENEFICHE ---
+    function updateDashboard() {
         document.getElementById('time').innerText = new Date().toLocaleTimeString();
     }
-    setInterval(updateClock, 1000);
-    updateClock();
+    setInterval(updateDashboard, 1000);
+    updateDashboard();
+
+    // Caricamento del salvadanaio dal bot
+    async function loadCharity() {
+        try {
+            const res = await fetch(BOT_URL + '/charity-stats', { headers: { "Bypass-Tunnel-Reminder": "true" } });
+            const data = await res.json();
+            const totale = data.totale || 0;
+            document.getElementById('charity-total').innerText = `€ ${totale.toFixed(2)}`;
+            const percentuale = Math.min((totale / 500) * 100, 100);
+            document.getElementById('fund-progress').style.width = `${percentuale}%`;
+        } catch (e) {}
+    }
 
     const BOT_URL = "https://keygap-sovereign-node.serveousercontent.com"; 
-    
-    // --- ARMAMENTO AFFILIATO ---
     const TARGET_AMAZON = "keygap-21";
-    // ⚠️ SOSTITUISCI CON IL TUO VERO ID CAMPAGNA EBAY (10 CIFRE)
     const CAMPAIGN_EBAY = "5339145312"; 
 
-    // Motore Javascript intelligente
+    loadCharity(); // Carica i soldi al lancio
+
     async function go(path, isPost, platform = 'amazon') {
-        
-        // Estraiamo il termine di ricerca o il nome della categoria per il paracadute di emergenza
         let queryText = document.getElementById('q').value;
-        if (!isPost && path.includes('?f=')) {
-            queryText = path.split('?f=')[1]; 
-        }
+        if (!isPost && path.includes('?f=')) { queryText = path.split('?f=')[1]; }
         if (!queryText) queryText = 'offerte tech';
         
         const fallbackAmazon = `https://www.amazon.it/s?k=${encodeURIComponent(queryText)}&tag=${TARGET_AMAZON}`;
@@ -143,15 +163,9 @@
                 const filterTarget = path.includes('?') ? `${target}&store=${platform}` : `${target}?store=${platform}`;
                 res = await fetch(filterTarget, { headers });
             }
-            
             const data = await res.json();
-            if(data.url) {
-                window.location.href = data.url;
-            } else {
-                throw new Error("Dati corrotti dal Nodo");
-            }
+            if(data.url) { window.location.href = data.url; }
         } catch (e) {
-            // Se il bot Python è spento, atterra in sicurezza sui link affiliati
             window.location.href = (platform === 'ebay') ? fallbackEbay : fallbackAmazon;
         }
     }
