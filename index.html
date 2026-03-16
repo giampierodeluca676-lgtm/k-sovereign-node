@@ -18,14 +18,18 @@
         .header { background: var(--sub); padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .logo { font-family: 'Orbitron'; color: var(--neon); font-size: 1.4rem; letter-spacing: 2px; }
         .main { padding: 15px; max-width: 800px; margin: 0 auto; flex: 1; }
-        .search-form { display: flex; gap: 10px; margin-bottom: 20px; }
-        input { flex: 1; background: var(--sub); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; color: #fff; outline: none; font-size: 16px; }
-        .btn-scan { background: var(--neon); border: none; padding: 15px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; color: #000; font-family: 'Orbitron'; font-size: 0.8rem; }
+        
+        /* Modifica strutturale per i due bottoni di fuoco */
+        .search-form { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        input { flex: 1 1 100%; background: var(--sub); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; color: #fff; outline: none; font-size: 16px; margin-bottom: 5px; }
+        .btn-amz { background: #ff9900; color: #000; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Orbitron'; font-size: 0.8rem; flex: 1; transition: opacity 0.3s; }
+        .btn-ebay { background: #0064d2; color: #fff; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Orbitron'; font-size: 0.8rem; flex: 1; transition: opacity 0.3s; }
+        .btn-amz:hover, .btn-ebay:hover { opacity: 0.8; }
+        
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .panel { background: var(--panel); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
         .link { display: block; background: var(--neon); color: #000; text-decoration: none; font-weight: bold; padding: 10px; border-radius: 6px; text-transform: uppercase; font-size: 0.7rem; }
         
-        /* NUOVI STILI PER IL NODO TELEGRAM */
         .telegram-node { background: var(--panel); border: 1px solid var(--neon); border-radius: 10px; padding: 20px; text-align: center; margin-top: 25px; box-shadow: 0 0 15px rgba(0, 255, 149, 0.05); }
         .tg-title { font-family: 'Orbitron'; color: var(--neon); font-size: 1rem; margin-top: 0; letter-spacing: 1px; }
         .tg-desc { font-size: 0.85rem; color: #aaa; margin-bottom: 20px; line-height: 1.5; }
@@ -42,7 +46,8 @@
 <div class="main">
     <div class="search-form">
         <input type="text" id="q" placeholder="Esegui scansione database...">
-        <button class="btn-scan" onclick="go('/node-search', true)">SCAN</button>
+        <button class="btn-amz" onclick="go('/node-search', true, 'amazon')">AMAZON</button>
+        <button class="btn-ebay" onclick="go('/node-search', true, 'ebay')">EBAY</button>
     </div>
     <div class="grid">
         <div class="panel"><h4>GAMING</h4><a href="/filter?f=gaming" class="link">Accedi</a></div>
@@ -69,31 +74,61 @@
 <script>
     document.getElementById('time').innerText = new Date().toLocaleTimeString();
     const BOT_URL = "https://keygap-sovereign-node.serveousercontent.com"; 
+    
+    // --- ARMAMENTO AFFILIATO ---
+    const TARGET_AMAZON = "keygap-21";
+    // ⚠️ SOSTITUISCI CON IL TUO VERO ID CAMPAGNA EBAY (10 CIFRE)
+    const CAMPAIGN_EBAY = "5339145312"; 
 
-    async function go(path, isPost) {
-        const query = document.getElementById('q').value;
+    // Motore di scansione potenziato a doppia piattaforma
+    async function go(path, isPost, platform = 'amazon') {
+        const query = document.getElementById('q').value || 'offerte tech';
+        
+        // Paracadute di emergenza (fallback se il tunnel cade)
+        const fallbackAmazon = `https://www.amazon.it/s?k=${encodeURIComponent(query)}&tag=${TARGET_AMAZON}`;
+        const fallbackEbay = `https://www.ebay.it/sch/i.html?_nkw=${encodeURIComponent(query)}&mkcid=1&mkrid=724-53478-19255-0&siteid=35&campid=${CAMPAIGN_EBAY}&customid=keygap_web_fallback&toolid=10001&mkevt=1`;
+
         const target = BOT_URL + path;
         try {
             let res;
             const headers = { "Bypass-Tunnel-Reminder": "true" };
             if(isPost) {
+                // Passiamo al bot backend quale piattaforma ha scelto l'utente
                 res = await fetch(target, { 
                     method: 'POST', 
                     headers: { ...headers, 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({q: query}) 
+                    body: new URLSearchParams({q: query, store: platform}) 
                 });
             } else {
-                res = await fetch(target, { headers });
+                // Per i filtri rapidi (es. Gaming), aggiungiamo il parametro store
+                const filterTarget = path.includes('?') ? `${target}&store=${platform}` : `${target}?store=${platform}`;
+                res = await fetch(filterTarget, { headers });
             }
+            
             const data = await res.json();
-            if(data.url) window.location.href = data.url;
+            if(data.url) {
+                window.location.href = data.url;
+            } else {
+                throw new Error("Dati corrotti dal Nodo");
+            }
         } catch (e) {
-            window.location.href = `https://www.amazon.it/s?k=${query || 'offerte'}&tag=keygap-21`;
+            // Se il bot Python è spento o schiantato, l'utente non vede alcun errore. 
+            // Viene paracadutato sul tuo link affiliato e tu non perdi il click.
+            window.location.href = (platform === 'ebay') ? fallbackEbay : fallbackAmazon;
         }
     }
+
+    // Aggancio dei 4 pannelli rapidi (Default su Amazon, ma espandibile)
     document.querySelectorAll('.link').forEach(l => {
-        l.onclick = (e) => { e.preventDefault(); go(l.getAttribute('href'), false); };
+        l.onclick = (e) => { 
+            e.preventDefault(); 
+            go(l.getAttribute('href'), false, 'amazon'); 
+        };
     });
 </script>
 </body>
 </html>
+
+
+
+
