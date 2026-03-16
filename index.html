@@ -33,7 +33,6 @@
         .btn-mini-amz { flex: 1; background: #ff9900; color: #000; border: none; padding: 10px 5px; border-radius: 6px; font-weight: bold; cursor: pointer; font-family: 'Orbitron'; font-size: 0.65rem; transition: opacity 0.3s; }
         .btn-mini-ebay { flex: 1; background: #0064d2; color: #fff; border: none; padding: 10px 5px; border-radius: 6px; font-weight: bold; cursor: pointer; font-family: 'Orbitron'; font-size: 0.65rem; transition: opacity 0.3s; }
         
-        /* STILE SALVADANAIO BENEFICO */
         .charity-node { background: rgba(0, 255, 149, 0.03); border: 1px dashed var(--neon); border-radius: 10px; padding: 20px; text-align: center; margin-top: 25px; }
         .fund-display { font-family: 'Orbitron'; font-size: 1.8rem; color: var(--neon); text-shadow: 0 0 10px var(--neon); margin: 10px 0; }
         .progress-bar-container { background: rgba(255,255,255,0.05); height: 8px; border-radius: 4px; overflow: hidden; margin: 15px 0 5px; }
@@ -93,7 +92,7 @@
     <div class="charity-node">
         <h3 class="tg-title">COMMUNITY CHARITY FUND</h3>
         <div class="fund-display" id="charity-total">€ 0.00</div>
-        <p class="tg-desc">Una parte delle commissioni viene accumulata qui. Al traguardo, la community deciderà l'evoluzione del fondo.</p>
+        <p class="tg-desc">Parte delle commissioni reali ricevute viene devoluta in beneficenza. Per maggiori informazioni e trasparenza, visita il nostro canale Telegram.</p>
         <div class="progress-bar-container">
             <div id="fund-progress" class="progress-bar"></div>
         </div>
@@ -116,14 +115,12 @@
 </footer>
 
 <script>
-    // --- OROLOGIO E STATS BENEFICHE ---
-    function updateDashboard() {
+    function updateClock() {
         document.getElementById('time').innerText = new Date().toLocaleTimeString();
     }
-    setInterval(updateDashboard, 1000);
-    updateDashboard();
+    setInterval(updateClock, 1000);
+    updateClock();
 
-    // Caricamento del salvadanaio dal bot
     async function loadCharity() {
         try {
             const res = await fetch(BOT_URL + '/charity-stats', { headers: { "Bypass-Tunnel-Reminder": "true" } });
@@ -139,16 +136,14 @@
     const TARGET_AMAZON = "keygap-21";
     const CAMPAIGN_EBAY = "5339145312"; 
 
-    loadCharity(); // Carica i soldi al lancio
+    loadCharity();
 
     async function go(path, isPost, platform = 'amazon') {
         let queryText = document.getElementById('q').value;
         if (!isPost && path.includes('?f=')) { queryText = path.split('?f=')[1]; }
         if (!queryText) queryText = 'offerte tech';
-        
         const fallbackAmazon = `https://www.amazon.it/s?k=${encodeURIComponent(queryText)}&tag=${TARGET_AMAZON}`;
         const fallbackEbay = `https://www.ebay.it/sch/i.html?_nkw=${encodeURIComponent(queryText)}&mkcid=1&mkrid=724-53478-19255-0&siteid=35&campid=${CAMPAIGN_EBAY}&customid=keygap_web_fallback&toolid=10001&mkevt=1`;
-
         const target = BOT_URL + path;
         try {
             let res;

@@ -3,30 +3,17 @@ from urllib.parse import parse_qs, quote, urlparse
 from datetime import datetime
 
 TARGET_AMAZON = "keygap-21"
-# ⚠️ INSERISCI QUI IL TUO ID CAMPAGNA EBAY (10 CIFRE) ⚠️
 CAMPAIGN_EBAY = "5339145312"
 PORT = 8100
 DB_FILE = "keygap_stats.db"
 
-# --- 1. INIZIALIZZAZIONE MEMORIA STORICA ---
 def init_db():
     try:
         conn = sqlite3.connect(DB_FILE)
         c = conn.cursor()
         c.execute('CREATE TABLE IF NOT EXISTS logs (id INTEGER PRIMARY KEY AUTOINCREMENT, data TEXT, ora TEXT, ip TEXT, citta TEXT, azione TEXT, dettaglio TEXT, piattaforma TEXT)')
-        # NUOVA TABELLA PER IL SALVADANAIO
         c.execute('CREATE TABLE IF NOT EXISTS charity (id INTEGER PRIMARY KEY, totale REAL)')
         c.execute('INSERT OR IGNORE INTO charity (id, totale) VALUES (1, 0.0)')
-        conn.commit()
-        conn.close()
-    except: pass
-
-def update_charity(amount=0.05):
-    """Incrementa il salvadanaio a ogni interazione reale."""
-    try:
-        conn = sqlite3.connect(DB_FILE)
-        c = conn.cursor()
-        c.execute('UPDATE charity SET totale = totale + ? WHERE id = 1', (amount,))
         conn.commit()
         conn.close()
     except: pass
@@ -90,7 +77,23 @@ class FinalHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         parsed_path = urlparse(self.path)
-        # NUOVO ENDPOINT PER LE STATISTICHE DEL SALVADANAIO
+        
+        # --- COMANDO MANUALE DI AGGIORNAMENTO ---
+        # Uso: https://[URL-BOT]/set-fund?val=15.50
+        if parsed_path.path == '/set-fund':
+            try:
+                query_params = parse_qs(parsed_path.query)
+                nuovo_totale = float(query_params.get('val', [0])[0])
+                conn = sqlite3.connect(DB_FILE)
+                c = conn.cursor()
+                c.execute('UPDATE charity SET totale = ? WHERE id = 1', (nuovo_totale,))
+                conn.commit()
+                conn.close()
+                print(f"\033[1;32m[✓] SALVADANAIO AGGIORNATO MANUALMENTE: € {nuovo_totale}\033[0m")
+                self.send_response(200); self.end_headers(); self.wfile.write(b"OK")
+            except: pass
+            return
+
         if parsed_path.path == '/charity-stats':
             try:
                 conn = sqlite3.connect(DB_FILE)
@@ -115,8 +118,6 @@ class FinalHandler(http.server.SimpleHTTPRequestHandler):
                     'smartphone': ('[PANNELLO] Smartphone', 'Telefonia Mobile', 'Dispositivi & Cover')
                 }
                 tasto_premuto, categoria, oggetto_specifico = mappa_filtri.get(filtro, ('[LINK SCONOSCIUTO]', 'Varie', filtro))
-                
-                update_charity() # Incrementa salvadanaio
                 
                 if store == 'ebay':
                     base_ebay = f"&mkcid=1&mkrid=724-53478-19255-0&siteid=35&campid={CAMPAIGN_EBAY}&customid=keygap_filter&toolid=10001&mkevt=1"
@@ -153,7 +154,6 @@ class FinalHandler(http.server.SimpleHTTPRequestHandler):
                 q = parsed_data.get('q', [''])[0]
                 store = parsed_data.get('store', ['amazon'])[0]
                 if q:
-                    update_charity() # Incrementa salvadanaio
                     tasto_premuto = f"[BTN SCAN] {store.upper()}"
                     categoria = "Ricerca Libera Testo"
                     oggetto_specifico = f'"{q}"'
