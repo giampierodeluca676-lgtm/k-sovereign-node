@@ -46,6 +46,11 @@
 
         .footer { margin-top: 40px; padding: 30px 15px; text-align: center; font-size: 0.65rem; color: rgba(255,255,255,0.4); border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); }
         .footer b { color: var(--neon); }
+
+        /* --- STILI DROP SEGRETI --- */
+        .btn-secret { background: #ff0055; color: #fff; border: 1px solid #ff0055; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Orbitron'; font-size: 0.9rem; width: 100%; margin-top: 20px; transition: all 0.3s; box-shadow: 0 0 15px rgba(255, 0, 85, 0.4); animation: pulse-red 2s infinite; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-secret:hover { background: transparent; color: #ff0055; }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(255, 0, 85, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 0, 85, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 0, 85, 0); } }
     </style>
 </head>
 <body>
@@ -88,6 +93,10 @@
             </div>
         </div>
     </div>
+
+    <button class="btn-secret" onclick="window.open('https://t.me/IL_TUO_GRUPPO_PRIVATO', '_blank')">
+        ☢️ ACCEDI AI DROP SEGRETI (SOLO MEMBRI)
+    </button>
 
     <div class="charity-node">
         <h3 class="tg-title">COMMUNITY CHARITY FUND</h3>
